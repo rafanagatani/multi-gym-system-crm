@@ -1,0 +1,49 @@
+# =====================================================================
+#  Academia System - regras Apache (cPanel)
+# =====================================================================
+
+# ---- URLs amigaveis -------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Se o sistema estiver numa subpasta, ajuste a linha abaixo.
+    # Ex.: sistema em https://seudominio.com/academia  ->  RewriteBase /academia
+    # RewriteBase /
+
+    # Nao reescreve arquivos/pastas que existem de verdade
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Tudo o mais vai para o front controller
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# ---- Protege pastas internas ---------------------------------------
+RedirectMatch 403 ^/?(config|app|sql)(/|$)
+
+# ---- Esconde arquivos sensiveis ------------------------------------
+<FilesMatch "\.(sql|md|json|lock|ini|log|bak)$">
+    Require all denied
+</FilesMatch>
+
+# ---- Seguranca basica ----------------------------------------------
+Options -Indexes
+ServerSignature Off
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ---- Cache de assets estaticos -------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+</IfModule>
+
+# ---- Charset --------------------------------------------------------
+AddDefaultCharset UTF-8
